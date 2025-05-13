@@ -7,6 +7,7 @@ function App() {
   const [fromCurrency, setFromCurrency] = useState("USD")
   const [toCurrency, setToCurrency] = useState("EUR")
   const [result, setResult] = useState(null)
+  const [error, setError] = useState(null)
 
 
   const rates = {
@@ -20,16 +21,36 @@ function App() {
     }
   }
 
+  // changement du state amount
   const changeAmount = (e) => {
     const value = parseFloat(e.target.value);
     !isNaN(value) ? setAmount(value) : setAmount('');
   }
 
+  // affichage de l'erreur
+  const displayError = (message) => {
+    setError(message);
+    setResult(null);  
+  }
+
+  // calcul du montant converti
   const calculate = () => {
-    const result = (parseFloat(amount) * rates[fromCurrency][toCurrency].rate).toFixed(2);
+    const parsedAmount = parseFloat(amount);
+    
+    if(parsedAmount < 0){
+      displayError("Le montant doit être supérieur à 0");
+      return;
+    }
+    if(isNaN(parsedAmount)){
+      console.log("NaN");
+      displayError("Le montant doit être un nombre");
+      return;
+    }
+    const result = (parsedAmount * rates[fromCurrency][toCurrency].rate).toFixed(2);
     setResult(
       `${result} ${rates[fromCurrency][toCurrency].symbol}`
     );
+    setError(null);
   }
 
   return (
@@ -48,8 +69,11 @@ function App() {
         </select>
       </div>
       <button onClick={calculate}>Calculer</button>
-      <div className={result ? "result" : ""}>
-        {result ?? ""}
+      <div className={error ? "error" : "hide"}>
+        {error}
+      </div>
+      <div className={result ? "result" : "hide"}>
+        {result}
       </div>
     </div>
   )
